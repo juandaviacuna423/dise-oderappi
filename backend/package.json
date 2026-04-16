@@ -1,0 +1,22 @@
+{
+  "name": "rappi-backend",
+  "version": "1.0.0",
+  "description": "Backend para sistema tipo Rappi con autenticación, catálogo y pedidos.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.0.1",
+    "nodemon": "^3.0.1"
+  }
+}
