@@ -24,6 +24,8 @@ export const CartProvider = ({ children }) => {
       }
       return [...current, { ...product, cantidad: 1 }];
     });
+
+    return { success: true };
   };
 
   const updateQuantity = (productoId, cantidad) => {

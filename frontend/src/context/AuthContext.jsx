@@ -1,25 +1,41 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 const parseToken = (token) => {
   try {
-    const payload = token.split('.')[1];
-    return JSON.parse(atob(payload));
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp && Date.now() / 1000 > payload.exp) {
+      return null;
+    }
+    return payload;
   } catch (error) {
     return null;
   }
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(() => {
+    const stored = localStorage.getItem('token');
+    const payload = stored ? parseToken(stored) : null;
+    if (!payload) {
+      localStorage.removeItem('token');
+      return null;
+    }
+    return stored;
+  });
   const [user, setUser] = useState(() => (token ? parseToken(token) : null));
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (token) {
-      setUser(parseToken(token));
+      const payload = parseToken(token);
+      if (!payload) {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+        return;
+      }
+      setUser(payload);
     } else {
       setUser(null);
     }
@@ -28,13 +44,11 @@ export const AuthProvider = ({ children }) => {
   const login = (newToken) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
-    navigate('/catalog');
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
-    navigate('/login');
   };
 
   return (

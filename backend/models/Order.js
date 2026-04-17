@@ -9,14 +9,18 @@ const OrderSchema = new mongoose.Schema(
     },
     tienda: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Store',
-      required: true
+      ref: 'Store'
     },
     items: [
       {
         producto: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
+          required: true
+        },
+        tienda: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Store',
           required: true
         },
         nombre: {

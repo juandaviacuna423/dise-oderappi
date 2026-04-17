@@ -1,15 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
+import Toast from '../components/Toast';
 
 const Cart = () => {
   const { items, updateQuantity, total, clearCart } = useCart();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   const handleConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setToast({ type: 'error', message: 'Debes iniciar sesión' });
+        return;
+      }
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -21,13 +31,22 @@ const Cart = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        setToast({ type: 'error', message: data.message || 'Error al confirmar pedido' });
+        if (response.status === 401) {
+          logout();
+          setToast({ type: 'error', message: 'Sesión inválida. Inicia sesión nuevamente.' });
+          navigate('/login');
+        } else {
+          setToast({ type: 'error', message: data.message || 'Error al confirmar pedido' });
+        }
+        setModalOpen(false);
       } else {
+        setToast({ type: 'success', message: '✓ Pedido confirmado correctamente' });
         clearCart();
-        window.location.href = '/orders';
+        setTimeout(() => navigate('/orders'), 1500);
       }
     } catch (error) {
-      setToast({ type: 'error', message: 'Error de conexión' });
+      setToast({ type: 'error', message: 'Error de conexión al servidor' });
+      console.error('Order error:', error);
     }
   };
 
@@ -167,15 +186,12 @@ const Cart = () => {
       />
 
       {toast && (
-        <div className="fixed bottom-4 right-4 z-50 animate-bounce">
-          <div className={`rounded-xl px-6 py-4 text-white font-semibold shadow-lg ${
-            toast.type === 'error' 
-              ? 'bg-red-600' 
-              : 'bg-green-600'
-          }`}>
-            {toast.type === 'error' ? '❌' : '✅'} {toast.message}
-          </div>
-        </div>
+        <Toast 
+          message={toast.message} 
+          type={toast.type}
+          onClose={() => setToast(null)}
+          duration={toast.type === 'success' ? 2000 : 3000}
+        />
       )}
     </div>
   );

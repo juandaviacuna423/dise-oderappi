@@ -4,7 +4,7 @@ const { createOrder, getMyOrders, updateOrderStatus } = require('../controllers/
 
 const router = express.Router();
 router.post('/', authMiddleware, createOrder);
-router.get('/my', authMiddleware, getMyOrders);
+router.get('/my', authMiddleware, getMyOrders);  // DEBE SER ANTES de /:id
 router.patch('/:id/status', authMiddleware, updateOrderStatus);
 
 module.exports = router;

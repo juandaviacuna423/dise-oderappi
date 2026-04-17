@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ nombre: '', email: '', password: '', password2: '', rol: 'cliente' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,10 +37,12 @@ const Register = () => {
       if (!response.ok) {
         setError(data.message || 'Error al registrar');
       } else {
-        setSuccess('Registro exitoso. Ya puedes iniciar sesión.');
+        setSuccess('Registro exitoso. Redirigiendo...');
+        setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err) {
       setError('Error de conexión');
+      console.error('Register error:', err);
     } finally {
       setLoading(false);
     }

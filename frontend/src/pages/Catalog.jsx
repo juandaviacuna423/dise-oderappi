@@ -15,16 +15,29 @@ const Catalog = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadStores = async () => {
       setLoading(true);
-      const params = new URLSearchParams({ page, categoria: category });
-      const response = await fetch(`/api/stores?${params.toString()}`);
-      const data = await response.json();
-      setStores(data.data || []);
-      setPages(data.pages || 1);
-      setLoading(false);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ page, categoria: category });
+        const response = await fetch(`/api/stores?${params.toString()}`);
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar tiendas');
+        }
+        
+        const data = await response.json();
+        setStores(data.data || []);
+        setPages(data.pages || 1);
+      } catch (err) {
+        setError(err.message || 'Error al cargar las tiendas');
+        console.error('Catalog fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadStores();
   }, [category, page]);
@@ -89,6 +102,18 @@ const Catalog = () => {
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="animate-pulse rounded-2xl bg-white p-6 h-80" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-16">
+          <div className="text-5xl mb-4">❌</div>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">{error}</h3>
+          <p className="text-slate-600 mb-6">No pudimos cargar las tiendas disponibles</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 rounded-lg bg-[#FF6B35] text-white font-bold hover:bg-[#F04C1F]"
+          >
+            🔄 Recargar
+          </button>
         </div>
       ) : filteredStores.length === 0 ? (
         <div className="text-center py-16">

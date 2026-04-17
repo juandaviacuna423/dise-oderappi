@@ -2,84 +2,75 @@ const ConfirmModal = ({ open, onClose, onConfirm, items, total }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-6">
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden animate-in fade-in scale-95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#FF6B35] to-[#F04C1F] p-6 text-white">
-          <h2 className="text-2xl font-bold">✓ Confirmar tu pedido</h2>
-          <p className="text-white/80 mt-1">Revisa los detalles antes de completar</p>
+        <div className="bg-[#FF6B35] p-4 text-white flex-shrink-0">
+          <h2 className="text-xl font-bold">Confirmar pedido</h2>
+          <p className="text-white/80 text-sm">Revisa los detalles</p>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Content - Scrollable */}
+        <div className="p-4 overflow-y-auto flex-1">
           {/* Items List */}
-          <div className="mb-6">
-            <h3 className="text-sm font-bold text-slate-600 uppercase mb-4">Productos</h3>
-            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+          <div className="mb-4">
+            <h3 className="text-xs font-bold text-slate-600 uppercase mb-2">Productos ({items.length})</h3>
+            <div className="space-y-2">
               {items.map((item) => (
-                <div key={item.productoId} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
-                  <div className="flex-1">
+                <div key={item.productoId} className="flex justify-between text-sm p-2 bg-slate-50 rounded">
+                  <div>
                     <p className="font-semibold text-slate-900">{item.nombre}</p>
-                    <p className="text-xs text-slate-500 mt-1">Cantidad: {item.cantidad} {item.cantidad === 1 ? 'artículo' : 'artículos'}</p>
+                    <p className="text-xs text-slate-500">x{item.cantidad}</p>
                   </div>
-                  <p className="font-bold text-[#FF6B35] text-lg whitespace-nowrap ml-4">
-                    ${(item.precio * item.cantidad).toLocaleString()}
-                  </p>
+                  <p className="font-bold text-[#FF6B35]">${(item.precio * item.cantidad).toLocaleString()}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Summary */}
-          <div className="bg-[#FF6B35]/10 rounded-xl p-4 mb-6 border border-[#FF6B35]/20">
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-sm text-slate-600 font-medium">Total a pagar</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-[#FF6B35]">
-                  ${total.toLocaleString()}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">Incluye envío gratis</p>
-              </div>
+          <div className="bg-[#FF6B35]/10 rounded-lg p-3 mb-4 border border-[#FF6B35]/20">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-slate-600 font-medium">Total</p>
+              <p className="text-2xl font-bold text-[#FF6B35]">${total.toLocaleString()}</p>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">Envío incluido</p>
+          </div>
+
+          {/* Benefits - Compact */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="text-center p-2 rounded bg-slate-50">
+              <span className="text-lg">🚀</span>
+              <p className="text-xs font-semibold text-slate-700">Rápido</p>
+            </div>
+            <div className="text-center p-2 rounded bg-slate-50">
+              <span className="text-lg">✅</span>
+              <p className="text-xs font-semibold text-slate-700">Rastreo</p>
+            </div>
+            <div className="text-center p-2 rounded bg-slate-50">
+              <span className="text-lg">🔒</span>
+              <p className="text-xs font-semibold text-slate-700">Seguro</p>
             </div>
           </div>
 
-          {/* Benefits */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="text-center p-3 rounded-lg bg-slate-50">
-              <span className="text-xl mb-1">🚀</span>
-              <p className="text-xs font-semibold text-slate-700">Envío rápido</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-slate-50">
-              <span className="text-xl mb-1">✅</span>
-              <p className="text-xs font-semibold text-slate-700">Rastreo en vivo</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-slate-50">
-              <span className="text-xl mb-1">🔒</span>
-              <p className="text-xs font-semibold text-slate-700">Pago seguro</p>
-            </div>
-          </div>
-
-          {/* Notice */}
-          <p className="text-xs text-slate-600 text-center mb-6 px-2">
-            Al confirmar, aceptas nuestros términos de servicio y política de privacidad
+          <p className="text-xs text-slate-500 text-center">
+            Al confirmar aceptas nuestros términos
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="border-t border-slate-200 p-6 bg-slate-50 flex items-center gap-3">
+        {/* Actions - Fixed Bottom */}
+        <div className="border-t border-slate-200 p-4 bg-slate-50 flex gap-2 flex-shrink-0">
           <button 
             onClick={onClose} 
-            className="flex-1 py-3 rounded-xl border-2 border-slate-300 text-slate-900 font-bold hover:bg-slate-100 transition"
+            className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-900 font-bold text-sm hover:bg-slate-100"
           >
             Cancelar
           </button>
           <button 
             onClick={onConfirm} 
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#FF6B35] to-[#F04C1F] text-white font-bold shadow-lg hover:shadow-xl transition"
+            className="flex-1 py-2 rounded-lg bg-[#FF6B35] text-white font-bold text-sm hover:bg-[#F04C1F]"
           >
-            🎉 Confirmar pedido
+            Confirmar
           </button>
         </div>
       </div>

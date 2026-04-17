@@ -29,15 +29,11 @@ const createOrder = async (req, res) => {
 
     const orderItems = [];
     let total = 0;
-    const tiendaId = productos[0].tienda.toString();
 
     for (const item of items) {
       const product = productos.find((p) => p._id.toString() === item.productoId);
       if (!product) {
         return res.status(404).json({ message: `Producto ${item.productoId} no encontrado` });
-      }
-      if (product.tienda.toString() !== tiendaId) {
-        return res.status(400).json({ message: 'Todos los productos deben pertenecer a la misma tienda' });
       }
       if (item.cantidad < 1) {
         return res.status(400).json({ message: 'Cantidad inválida para un producto' });
@@ -50,14 +46,14 @@ const createOrder = async (req, res) => {
         producto: product._id,
         nombre: product.nombre,
         precio: product.precio,
-        cantidad: item.cantidad
+        cantidad: item.cantidad,
+        tienda: product.tienda
       });
       total += product.precio * item.cantidad;
     }
 
     const order = await Order.create({
       cliente: req.user._id,
-      tienda: tiendaId,
       items: orderItems,
       total,
       estado: 'pendiente'

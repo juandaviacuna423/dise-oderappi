@@ -1,7 +1,22 @@
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import Toast from './Toast';
 
 export const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const [toast, setToast] = useState(null);
+
+  const handleAdd = () => {
+    addToCart({
+      productoId: product._id,
+      nombre: product.nombre,
+      precio: product.precio,
+      imagen: product.imagen,
+      descripcion: product.descripcion,
+      tienda: product.tienda?._id || product.tienda
+    });
+    setToast({ type: 'success', message: 'Producto agregado al carrito' });
+  };
 
   return (
     <div className="group rounded-2xl bg-white overflow-hidden border border-slate-100 transition duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -33,13 +48,7 @@ export const ProductCard = ({ product }) => {
           </div>
           
           <button
-            onClick={() => addToCart({ 
-              productoId: product._id, 
-              nombre: product.nombre, 
-              precio: product.precio,
-              imagen: product.imagen,
-              descripcion: product.descripcion
-            })}
+            onClick={handleAdd}
             disabled={product.stock === 0}
             className="px-4 py-2 rounded-lg bg-[#FF6B35] text-white font-semibold text-sm hover:bg-[#F04C1F] transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
@@ -47,6 +56,10 @@ export const ProductCard = ({ product }) => {
           </button>
         </div>
       </div>
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} duration={2500} />
+      )}
     </div>
   );
 };

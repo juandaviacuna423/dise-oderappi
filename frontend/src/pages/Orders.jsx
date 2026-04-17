@@ -1,19 +1,47 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { OrderCard } from '../components/OrderCard';
 
 const Orders = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchOrders = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    const response = await fetch('/api/orders/my', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await response.json();
-    setOrders(data || []);
-    setLoading(false);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Debes iniciar sesión');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/orders/my', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          navigate('/login');
+          throw new Error('Sesión inválida. Inicia sesión nuevamente.');
+        }
+        throw new Error('Error al cargar pedidos');
+      }
+
+      const data = await response.json();
+      setOrders(data || []);
+    } catch (err) {
+      setError(err.message || 'Error al cargar pedidos');
+      console.error('Orders fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -26,10 +54,14 @@ const Orders = () => {
         return { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', emoji: '⏳' };
       case 'confirmado':
         return { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', emoji: '✓' };
+      case 'en_preparacion':
+        return { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', emoji: '👨‍🍳' };
       case 'en_camino':
-        return { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', emoji: '🏍️' };
+        return { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', emoji: '🏍️' };
       case 'entregado':
-        return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', emoji: '📦' };
+        return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', emoji: '✅' };
+      case 'cancelado':
+        return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', emoji: '❌' };
       default:
         return { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', emoji: '?' };
     }
@@ -60,6 +92,19 @@ const Orders = () => {
                 <div className="h-20 bg-slate-300 rounded-lg"></div>
               </div>
             ))}
+          </div>
+        ) : error ? (
+          /* Error State */
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">❌</div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">{error}</h2>
+            <p className="text-slate-600 mb-6">No pudimos cargar tus pedidos</p>
+            <button 
+              onClick={fetchOrders}
+              className="inline-block px-8 py-3 rounded-xl bg-[#FF6B35] text-white font-bold hover:shadow-lg transition"
+            >
+              🔄 Intentar de nuevo
+            </button>
           </div>
         ) : orders.length === 0 ? (
           /* Empty State */

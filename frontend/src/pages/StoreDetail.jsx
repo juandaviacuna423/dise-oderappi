@@ -7,22 +7,53 @@ const StoreDetail = () => {
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [storeRes, productsRes] = await Promise.all([
-        fetch(`/api/stores/${id}`),
-        fetch(`/api/products/store/${id}`)
-      ]);
-      const storeData = await storeRes.json();
-      const productsData = await productsRes.json();
-      setStore(storeData);
-      setProducts(productsData);
-      setLoading(false);
+      setError(null);
+      try {
+        const [storeRes, productsRes] = await Promise.all([
+          fetch(`/api/stores/${id}`),
+          fetch(`/api/products/store/${id}`)
+        ]);
+        
+        if (!storeRes.ok || !productsRes.ok) {
+          throw new Error('Error al cargar los datos');
+        }
+        
+        const storeData = await storeRes.json();
+        const productsData = await productsRes.json();
+        
+        setStore(storeData);
+        setProducts(productsData || []);
+      } catch (err) {
+        setError(err.message || 'Error al cargar la tienda');
+        console.error('StoreDetail fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchData();
+    
+    if (id) {
+      fetchData();
+    }
   }, [id]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-2xl font-bold text-red-600 mb-4">❌ {error}</p>
+          <p className="text-slate-600 mb-6">Vuelve al catálogo e intenta de nuevo.</p>
+          <a href="/catalogo" className="px-6 py-2 bg-[#FF6B35] text-white rounded-lg font-bold">
+            ← Volver al catálogo
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
